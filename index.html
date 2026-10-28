@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skan Service | Plataforma Multiservicios & Inspección SpA</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkmetal: '#0b1120',
+                        cardmetal: '#151f32',
+                        neoncyan: '#06b6d4',
+                        neonblue: '#3b82f6',
+                        darkborder: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome & Lucide Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Leaflet CSS & JS for Interactive Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        .neon-glow { box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+        .neon-border { border-color: #06b6d4; box-shadow: inset 0 0 10px rgba(6, 182, 212, 0.2); }
+        #map { height: 100%; width: 100%; border-radius: 0.75rem; }
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body class="bg-darkmetal text-slate-100 min-h-screen flex flex-col font-sans selection:bg-neoncyan selection:text-darkmetal">
+
+    <!-- Header / Navbar Principal -->
+    <header class="bg-cardmetal border-b border-darkborder sticky top-0 z-50 px-4 lg:px-8 py-3 flex items-center justify-between shadow-xl">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-neoncyan to-blue-600 flex items-center justify-center neon-glow">
+                <i class="fa-solid fa-bolt text-darkmetal text-xl font-bold"></i>
+            </div>
+            <div>
+                <span class="text-xl font-black tracking-wider text-white">SKAN <span class="text-neoncyan">SERVICE</span></span>
+                <span class="block text-[10px] text-slate-400 tracking-widest uppercase font-semibold">Plataforma Multiservicios & Inspección SpA</span>
+            </div>
+        </div>
+
+        <!-- Menú de Navegación Completo -->
+        <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
+            <a href="#inicio" class="hover:text-neoncyan transition-colors">Inicio</a>
+            <a href="#servicios" class="hover:text-neoncyan transition-colors">Servicios Domiciliarios</a>
+            <a href="#cobertura" class="hover:text-neoncyan transition-colors">Cobertura & Especialidades</a>
+            <a href="#ingenieria" class="hover:text-neoncyan transition-colors">Auditoría & ITO SKAN</a>
+            <a href="#mapa-section" class="hover:text-neoncyan transition-colors">Mapa en Vivo</a>
+        </nav>
+
+        <!-- Botones de Acción / Registro -->
+        <div class="flex items-center space-x-3">
+            <button onclick="openProviderModal()" class="hidden sm:inline-flex items-center px-3.5 py-2 rounded-lg border border-neoncyan text-neoncyan hover:bg-neoncyan hover:text-darkmetal text-xs font-bold transition-all">
+                <i class="fa-solid fa-user-tie mr-1.5"></i> Registrarse como Proveedor
+            </button>
+            <button onclick="openClientModal()" class="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-neoncyan to-blue-600 text-darkmetal font-bold text-xs hover:opacity-90 shadow-md neon-glow transition-all">
+                <i class="fa-solid fa-shield-halved mr-1.5"></i> Pedir Servicio (Registro Seguro)
+            </button>
+        </div>
+    </header>
+
+    <!-- Banner Hero / Bienvenida -->
+    <section id="inicio" class="relative bg-gradient-to-b from-cardmetal to-darkmetal border-b border-darkborder py-10 px-4 text-center">
+        <div class="max-w-4xl mx-auto space-y-4">
+            <span class="inline-block px-3 py-1 bg-neoncyan/10 border border-neoncyan/30 rounded-full text-neoncyan text-xs font-semibold tracking-wider uppercase">
+                Red de Soluciones Técnicas, Profesionales y de Inspección
+            </span>
+            <h1 class="text-3xl lg:text-5xl font-extrabold text-white tracking-tight">
+                Servicios a Domicilio Verificados & <span class="text-neoncyan">Auditoría Técnica SKAN</span>
+            </h1>
+            <p class="text-slate-300 text-sm lg:text-base max-w-2xl mx-auto">
+                Conectamos clientes con profesionales de salud, técnicos e ingenieros verificados con biometría y carné de identidad para máxima seguridad en terreno.
+            </p>
+        </div>
+    </section>
+
+    <!-- Sección Interactiva: Mapa en Vivo + Panel Flotante -->
+    <section id="mapa-section" class="p-4 lg:p-6 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Panel Izquierdo: Buscador & Especialistas -->
+        <div class="lg:col-span-4 flex flex-col space-y-4">
+            <div class="bg-cardmetal border border-darkborder p-4 rounded-xl shadow-md">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-neoncyan mb-3 flex items-center">
+                    <i class="fa-solid fa-magnifying-glass mr-2"></i> Buscar Especialidad
+                </h2>
+                <input type="text" id="searchInput" onkeyup="filterProviders()" placeholder="Ej. Electricista SEC, Kine, Enfermera, Calefont..." class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-neoncyan">
+                
+                <div class="mt-3 flex flex-wrap gap-1.5">
+                    <button onclick="setFilter('todos')" class="px-2.5 py-1 rounded bg-neoncyan/20 text-neoncyan text-xs font-semibold border border-neoncyan/40">Todos</button>
+                    <button onclick="setFilter('salud')" class="px-2.5 py-1 rounded bg-darkmetal text-slate-300 text-xs border border-darkborder">Salud</button>
+                    <button onclick="setFilter('hogar')" class="px-2.5 py-1 rounded bg-darkmetal text-slate-300 text-xs border border-darkborder">Técnicos</button>
+                    <button onclick="setFilter('ingenieria')" class="px-2.5 py-1 rounded bg-darkmetal text-slate-300 text-xs border border-darkborder">ITO / SKAN</button>
+                </div>
+            </div>
+
+            <!-- Lista de Proveedores Activos -->
+            <div class="bg-cardmetal border border-darkborder p-4 rounded-xl shadow-md flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-bold uppercase text-slate-300">Disponibles Cercanos</h3>
+                    <span class="text-[11px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-mono font-semibold">En Vivo</span>
+                </div>
+
+                <div id="providerContainer" class="space-y-3 overflow-y-auto max-h-[360px] pr-1">
+                    <div onclick="openClientModal()" class="bg-darkmetal border border-darkborder hover:border-neoncyan p-3 rounded-lg cursor-pointer transition-all">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-sm text-white">Carlos M. <span class="text-xs text-neoncyan">(Eléctrico SEC A)</span></h4>
+                            <span class="text-xs text-amber-400 font-semibold"><i class="fa-solid fa-star"></i> 4.9</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Certificación TE1, tableros y aumentos de capacidad.</p>
+                        <div class="mt-2 text-[11px] text-slate-400 flex justify-between">
+                            <span><i class="fa-solid fa-location-dot text-neoncyan mr-1"></i> Maipú</span>
+                            <span class="text-neoncyan">Disponible</span>
+                        </div>
+                    </div>
+
+                    <div onclick="openClientModal()" class="bg-darkmetal border border-darkborder hover:border-neoncyan p-3 rounded-lg cursor-pointer transition-all">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-sm text-white">Dra. Camila M. <span class="text-xs text-neoncyan">(Kinesiología)</span></h4>
+                            <span class="text-xs text-amber-400 font-semibold"><i class="fa-solid fa-star"></i> 4.98</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Kinesioterapia motora y respiratoria a domicilio.</p>
+                        <div class="mt-2 text-[11px] text-slate-400 flex justify-between">
+                            <span><i class="fa-solid fa-location-dot text-neoncyan mr-1"></i> Santiago Centro</span>
+                            <span class="text-neoncyan">Disponible</span>
+                        </div>
+                    </div>
+
+                    <div onclick="openClientModal()" class="bg-darkmetal border border-darkborder hover:border-neoncyan p-3 rounded-lg cursor-pointer transition-all">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-sm text-white">Dra. Andrea S. <span class="text-xs text-neoncyan">(Enfermería)</span></h4>
+                            <span class="text-xs text-amber-400 font-semibold"><i class="fa-solid fa-star"></i> 5.0</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Curaciones, inyectables y cuidado de enfermos/adulto mayor.</p>
+                        <div class="mt-2 text-[11px] text-slate-400 flex justify-between">
+                            <span><i class="fa-solid fa-location-dot text-neoncyan mr-1"></i> Providencia</span>
+                            <span class="text-neoncyan">Disponible</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenedor del Mapa -->
+        <div class="lg:col-span-8 bg-cardmetal border border-darkborder p-4 rounded-xl shadow-md min-h-[450px] flex flex-col">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-white mb-3 flex items-center">
+                <i class="fa-solid fa-map-location-dot text-neoncyan mr-2"></i> Cobertura Geográfica en Tiempo Real
+            </h2>
+            <div class="flex-1 w-full bg-darkmetal rounded-lg overflow-hidden border border-darkborder min-h-[400px]">
+                <div id="map"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Cobertura Completa de Servicios (#cobertura) -->
+    <section id="cobertura" class="py-12 bg-cardmetal/50 border-t border-darkborder px-4 lg:px-8">
+        <div class="max-w-7xl mx-auto space-y-8">
+            <div class="text-center space-y-2">
+                <h2 class="text-2xl lg:text-3xl font-bold text-white">Catálogo Completo de Cobertura SKAN</h2>
+                <p class="text-slate-400 text-sm">Explora las especialidades técnicas, médicas, profesionales y de ingeniería disponibles en la plataforma.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Categoria 1: Salud & Cuidados -->
+                <div class="bg-cardmetal border border-darkborder p-5 rounded-xl space-y-3 hover:border-neoncyan transition-all">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">Salud & Cuidados</h3>
+                    <ul class="text-xs text-slate-300 space-y-2">
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Enfermera a Domicilio (Curaciones, inyectables)</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Limpieza Dental a Domicilio</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Kinesiología Motora y Respiratoria</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Cuidadores de Niños (Babysitting)</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Cuidadores de Adulto Mayor y Enfermos</li>
+                    </ul>
+                </div>
+
+                <!-- Categoria 2: Técnicos de Línea Blanca & Climatización -->
+                <div class="bg-cardmetal border border-darkborder p-5 rounded-xl space-y-3 hover:border-neoncyan transition-all">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-temperature-arrow-down"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">Línea Blanca & Clima</h3>
+                    <ul class="text-xs text-slate-300 space-y-2">
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Reparación de Lavadoras y Secadoras</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Mantención de Refrigeradores</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Calefont Ionizados y Convencionales SEC</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Aire Acondicionado y Fan Coils</li>
+                    </ul>
+                </div>
+
+                <!-- Categoria 3: Oficios & Construcción -->
+                <div class="bg-cardmetal border border-darkborder p-5 rounded-xl space-y-3 hover:border-neoncyan transition-all">
+                    <div class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-hammer"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">Oficios & Hogar</h3>
+                    <ul class="text-xs text-slate-300 space-y-2">
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Eléctrica SEC (Certificación TE1)</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Carpintería, Mueblistas y Vidriería</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Hojalatería (Canales y Bajadas)</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Jardinería y Paisajismo</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Barberos, Peluqueros y Estilistas</li>
+                    </ul>
+                </div>
+
+                <!-- Categoria 4: Auditoría & Ingeniería SKAN SpA -->
+                <div class="bg-cardmetal border border-darkborder p-5 rounded-xl space-y-3 hover:border-neoncyan transition-all">
+                    <div class="w-10 h-10 rounded-lg bg-neoncyan/20 text-neoncyan flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-microscope"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">Auditoría SKAN SpA</h3>
+                    <ul class="text-xs text-slate-300 space-y-2">
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Inspección Técnica de Obras (ITO Clase A)</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Revision Documental (Planos y EETT)</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Cálculo de Cubicaciones y Materiales</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Control y Seguimiento de RFI</li>
+                        <li><i class="fa-solid fa-check text-neoncyan mr-1.5"></i> Abogados (Contratos de Obra & Asesoría)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODAL REGISTRO CLIENTE CON SEGURIDAD BIOMÉTRICA -->
+    <div id="clientModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-cardmetal border border-neoncyan/50 rounded-xl max-w-lg w-full p-6 shadow-2xl relative">
+            <button onclick="closeClientModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 rounded-lg bg-neoncyan/20 flex items-center justify-center text-neoncyan">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">Registro Seguro de Cliente</h3>
+                    <p class="text-xs text-slate-400">Verificación biométrica y de identidad obligatoria para la seguridad de los prestadores en domicilio.</p>
+                </div>
+            </div>
+
+            <form onsubmit="handleClientRegister(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre Completo</label>
+                        <input type="text" required placeholder="Tu nombre y apellido" class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">RUT / Cédula</label>
+                        <input type="text" required placeholder="12.345.678-9" class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Teléfono</label>
+                        <input type="tel" required placeholder="+56 9 ..." class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Servicio Requerido</label>
+                        <select class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan focus:outline-none">
+                            <option>Electricista SEC</option>
+                            <option>Enfermera / Cuidador a domicilio</option>
+                            <option>Limpieza dental a domicilio</option>
+                            <option>Kinesiología respiratoria/motora</option>
+                            <option>Abogado / Asesoría legal</option>
+                            <option>Técnico Calefont / Lavadora / AC</option>
+                            <option>Auditoría ITO / Cubicaciones (SKAN)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Dirección Exacta de Atención</label>
+                    <input type="text" required placeholder="Calle, número, comuna (Ej. Maipú)" class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan focus:outline-none">
+                </div>
+
+                <!-- Carga de Cédula y Selfie de Seguridad -->
+                <div class="border-t border-darkborder pt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-neoncyan mb-1"><i class="fa-solid fa-id-card mr-1"></i> Carné de Identidad (Ambos Lados)</label>
+                        <input type="file" required accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neoncyan/20 file:text-neoncyan">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neoncyan mb-1"><i class="fa-solid fa-camera mr-1"></i> Selfie de Verificación Biométrica</label>
+                        <input type="file" required accept="image/*" capture="user" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neoncyan/20 file:text-neoncyan">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neoncyan to-blue-600 text-darkmetal font-bold text-sm rounded-lg hover:opacity-90 shadow-lg neon-glow transition-all">
+                        Validar Identidad y Confirmar Solicitud
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRO DE PRESTADOR -->
+    <div id="providerModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-cardmetal border border-neoncyan/50 rounded-xl max-w-lg w-full p-6 shadow-2xl relative">
+            <button onclick="closeProviderModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 rounded-lg bg-neoncyan/20 flex items-center justify-center text-neoncyan">
+                    <i class="fa-solid fa-user-tie text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">Registro de Proveedor / Socio SKAN</h3>
+                    <p class="text-xs text-slate-400">Postula tu servicio técnico, profesional, de salud o ingeniería.</p>
+                </div>
+            </div>
+
+            <form onsubmit="handleProviderRegister(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre Completo</label>
+                        <input type="text" required placeholder="Tu nombre" class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Especialidad</label>
+                        <select class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan focus:outline-none">
+                            <option>Eléctrico SEC (Clase A, B, C)</option>
+                            <option>Enfermera / Cuidador</option>
+                            <option>Odontólogo (Limpiezas a domicilio)</option>
+                            <option>Kinesiólogo</option>
+                            <option>Abogado</option>
+                            <option>Técnico Clima / Calefont / Lavadora</option>
+                            <option>Ingeniero Auditor / ITO SKAN</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-neoncyan mb-1"><i class="fa-solid fa-file-shield mr-1"></i> Credenciales / Registro SEC / Título / SIS</label>
+                    <input type="file" required accept=".pdf,image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neoncyan/20 file:text-neoncyan">
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neoncyan to-blue-600 text-darkmetal font-bold text-sm rounded-lg hover:opacity-90 shadow-lg neon-glow transition-all">
+                        Enviar Postulación a Validación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-cardmetal border-t border-darkborder py-6 text-center text-xs text-slate-400">
+        <p>&copy; 2026 SKAN SpA. Todos los derechos reservados. Plataforma segura con validación biométrica para protección de prestadores y clientes.</p>
+    </footer>
+
+    <!-- Script Leaflet Map & Interacciones -->
+    <script>
+        const map = L.map('map').setView([-33.4489, -70.6693], 12);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{z}.png', {
+            maxZoom: 19,
+            attribution: '&copy; CARTO | SKAN SpA'
+        }).addTo(map);
+
+        const providers = [
+            { name: "Carlos M. (Electricista SEC)", lat: -33.5100, lng: -70.7580, rating: "4.9 ⭐" },
+            { name: "Dra. Camila M. (Kinesiología)", lat: -33.4400, lng: -70.6500, rating: "4.98 ⭐" },
+            { name: "Dra. Andrea S. (Enfermería)", lat: -33.4260, lng: -70.6090, rating: "5.0 ⭐" }
+        ];
+
+        providers.forEach(p => {
+            L.marker([p.lat, p.lng]).addTo(map)
+                .bindPopup(`<b style="color:#06b6d4">${p.name}</b><br>Calificación: ${p.rating}`);
+        });
+
+        function openClientModal() { document.getElementById('clientModal').classList.remove('hidden'); }
+        function closeClientModal() { document.getElementById('clientModal').classList.add('hidden'); }
+        function openProviderModal() { document.getElementById('providerModal').classList.remove('hidden'); }
+        function closeProviderModal() { document.getElementById('providerModal').classList.add('hidden'); }
+
+        function handleClientRegister(e) {
+            e.preventDefault();
+            alert('¡Registro de cliente seguro completado! Identidad biométrica verificada.');
+            closeClientModal();
+        }
+
+        function handleProviderRegister(e) {
+            e.preventDefault();
+            alert('¡Postulación enviada a SKAN SpA! Tus antecedentes entrarán en revisión.');
+            closeProviderModal();
+        }
+    </script>
+</body>
+</html>
