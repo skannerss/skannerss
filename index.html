@@ -386,14 +386,20 @@
 </div>
 
 <script>
+// Catálogo completo de servicios, oficios y profesiones de SKAN Service
 const listaEspecialidades = [
   "Abogado / Asesoría Legal",
+  "Carpintero / Mueblista",
   "Conductor / Transportista",
-  "Enfermera / Cuidador",
   "Eléctrico SEC (Clase A, B, C)",
+  "Enfermera / Cuidador",
+  "Gasfíter / Plomero",
   "Ingeniero Auditor / ITO SKAN",
   "Kinesiólogo",
+  "Maestro Constructor / Albañil",
+  "Mecánico Automotriz / Maquinaria",
   "Odontólogo",
+  "Soldador / Metalúrgico",
   "Técnico Clima / Calefont / Lavadora"
 ];
 
@@ -412,7 +418,7 @@ function filtrarEspecialidades(texto) {
     return;
   }
 
-  // FILTRO ESTRICTO: Solo muestra opciones que empiecen exactamente con lo que escribes
+  // Filtro estricto por la letra inicial exacta
   const filtradas = listaEspecialidades.filter(esp => esp.toLowerCase().startsWith(texto.toLowerCase()));
 
   if (filtradas.length > 0) {
@@ -438,7 +444,7 @@ function seleccionarEspecialidad(valor) {
   }
 }
 
-// Subidor optimizado usando Catbox para garantizar que los PDFs abran perfectamente
+// Subidor optimizado usando Catbox para archivos y PDFs
 async function subirArchivo(file) {
   if (!file) return null;
   const formData = new FormData();
@@ -511,7 +517,7 @@ async function handleProviderRegister(event) {
   event.target.reset();
   document.getElementById('seccionConductor').classList.add('hidden');
 }
-</script>     
+</script>    
 
 <script>
 // Lista maestra de especialidades para el buscador predictivo
