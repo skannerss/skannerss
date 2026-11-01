@@ -382,40 +382,74 @@ function closeClientModal() { document.getElementById('clientModal').classList.a
 function openProviderModal() { document.getElementById('providerModal').classList.remove('hidden'); }
 function closeProviderModal() { document.getElementById('providerModal').classList.add('hidden'); }
 
-function handleProviderRegister(event) {
+// Función auxiliar para subir archivos individualmente y generar sus enlaces
+async function subirArchivo(file) {
+  if (!file) return null;
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', 'unsigned');
+
+  try {
+    const res = await fetch("https://tmpfiles.org/api/v1/upload", {
+      method: "POST",
+      body: formData
+    });
+    const data = await res.json();
+    if (data && data.data && data.data.url) {
+      return data.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
+    }
+  } catch (e) {
+    console.error("Error subiendo archivo:", e);
+  }
+  return null;
+}
+
+async function handleProviderRegister(event) {
   event.preventDefault();
   
   const form = event.target;
-  const formData = new FormData(form);
-  
   const nombre = form.querySelector('input[type="text"]').value;
   const especialidad = form.querySelector('select').value;
   
-  // Envío automático al correo vía Formspree
-  fetch("https://formspree.io/f/xknkyqpr", {
-    method: "POST",
-    body: formData,
-    headers: {
-      'Accept': 'application/json'
-    }
-  }).then(response => {
-    // Notificación directa a tu WhatsApp
-    const miNumeroWhatsApp = "56967662502"; // Reemplaza las X por tu número real de celular
-    const mensajeWA = encodeURIComponent(
-      `*NUEVA POSTULACIÓN EN SKAN SERVICE*\n\n` +
-      `*Nombre:* ${nombre}\n` +
-      `*Especialidad:* ${especialidad}\n` +
-      `*Estado:* Antecedentes respaldados y enviados al correo.`
-    );
-    
-    window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
-    
-    alert("¡Postulación enviada con éxito a SKAN SpA! Antecedentes notificados.");
-    closeProviderModal();
-    form.reset();
-  }).catch(error => {
-    alert("Hubo un detalle al enviar los antecedentes. Por favor reintenta.");
-  });
+  // Selección de archivos desde el formulario
+  const carnetInput = form.querySelector('#doc_carnet');
+  const antecedentesInput = form.querySelector('#doc_antecedentes');
+  const cvInput = form.querySelector('#doc_cv');
+  const licenciaInput = form.querySelector('#doc_licencia');
+  const hojaVidaInput = form.querySelector('#doc_hoja_vida');
+  const tituloInput = form.querySelector('#doc_titulo');
+
+  // Subida en paralelo de la documentación básica requerida para todos
+  const linkCarnet = carnetInput && carnetInput.files[0] ? await subirArchivo(carnetInput.files[0]) : "No adjuntado";
+  const linkAntecedentes = antecedentesInput && antecedentesInput.files[0] ? await subirArchivo(antecedentesInput.files[0]) : "No adjuntado";
+  const linkCV = cvInput && cvInput.files[0] ? await subirArchivo(cvInput.files[0]) : "No adjuntado";
+  
+  // Subida opcional según perfil
+  const linkLicencia = licenciaInput && licenciaInput.files[0] ? await subirArchivo(licenciaInput.files[0]) : null;
+  const linkHojaVida = hojaVidaInput && hojaVidaInput.files[0] ? await subirArchivo(hojaVidaInput.files[0]) : null;
+  const linkTitulo = tituloInput && tituloInput.files[0] ? await subirArchivo(tituloInput.files[0]) : null;
+
+  // Construcción del mensaje para WhatsApp
+  let detalleDocs = `*1. Carnet (Ambos Lados):* ${linkCarnet}\n` +
+                    `*2. Antecedentes:* ${linkAntecedentes}\n` +
+                    `*3. Curriculum Vitae:* ${linkCV}\n`;
+
+  if (linkLicencia) detalleDocs += `*4. Licencia de Conducir:* ${linkLicencia}\n`;
+  if (linkHojaVida) detalleDocs += `*5. Hoja de Vida Conductor:* ${linkHojaVida}\n`;
+  if (linkTitulo) detalleDocs += `*6. Certificado de Título / SEC:* ${linkTitulo}\n`;
+
+  const miNumeroWhatsApp = "569XXXXXXXX"; // Reemplaza por tu número de teléfono real
+  const mensajeWA = encodeURIComponent(
+    `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
+    `*Nombre:* ${nombre}\n` +
+    `*Especialidad:* ${especialidad}\n\n` +
+    `*DOCUMENTACIÓN RECIBIDA:*\n${detalleDocs}`
+  );
+
+  window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
+  
+  closeProviderModal();
+  form.reset();
 }
     </script>
 </body>
