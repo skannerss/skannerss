@@ -305,6 +305,7 @@
     </div>
 
     <!-- MODAL REGISTRO DE PRESTADOR -->
+<!-- MODAL REGISTRO DE PRESTADOR -->
 <div id="providerModal" class="hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
   <div class="bg-cardmetal border border-darkborder rounded-xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
     <div class="flex justify-between items-center mb-4">
@@ -339,17 +340,22 @@
         <p class="text-xs font-bold text-cyan-400">Documentación Requerida (Obligatoria):</p>
         
         <div>
-          <label class="block text-xs text-slate-300 mb-1">1. Carnet de Identidad (Ambos Lados)</label>
-          <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_carnet">
+          <label class="block text-xs text-slate-300 mb-1">1. Carnet de Identidad (Lado Frontal)</label>
+          <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_carnet_frontal">
         </div>
 
         <div>
-          <label class="block text-xs text-slate-300 mb-1">2. Certificado de Antecedentes</label>
+          <label class="block text-xs text-slate-300 mb-1">2. Carnet de Identidad (Lado Trasero)</label>
+          <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_carnet_trasero">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">3. Certificado de Antecedentes</label>
           <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_antecedentes">
         </div>
 
         <div>
-          <label class="block text-xs text-slate-300 mb-1">3. Curriculum Vitae (CV)</label>
+          <label class="block text-xs text-slate-300 mb-1">4. Curriculum Vitae (CV)</label>
           <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_cv">
         </div>
       </div>
@@ -381,7 +387,6 @@
     </form>
   </div>
 </div>
-
     <!-- Footer -->
     <footer class="bg-cardmetal border-t border-darkborder py-6 text-center text-xs text-slate-400">
         <p>&copy; 2026 SKAN SpA. Todos los derechos reservados. Plataforma segura con validación biométrica para protección de prestadores y clientes.</p>
@@ -439,32 +444,33 @@ async function handleProviderRegister(event) {
   const nombre = document.getElementById('prov_nombre').value;
   const especialidad = document.getElementById('prov_especialidad').value;
   
-  const carnet = document.getElementById('doc_carnet').files[0];
+  const carnetFrontal = document.getElementById('doc_carnet_frontal').files[0];
+  const carnetTrasero = document.getElementById('doc_carnet_trasero').files[0];
   const antecedentes = document.getElementById('doc_antecedentes').files[0];
   const cv = document.getElementById('doc_cv').files[0];
   const licencia = document.getElementById('doc_licencia').files[0];
   const hojaVida = document.getElementById('doc_hoja_vida').files[0];
   const titulo = document.getElementById('doc_titulo').files[0];
 
-  // Subida de archivos obligatorios
-  const linkCarnet = await subirArchivo(carnet);
+  // Subida de archivos en orden preciso
+  const linkCarnetF = await subirArchivo(carnetFrontal);
+  const linkCarnetT = await subirArchivo(carnetTrasero);
   const linkAntecedentes = await subirArchivo(antecedentes);
   const linkCV = await subirArchivo(cv);
   
-  // Subida de archivos condicionales
   const linkLicencia = licencia ? await subirArchivo(licencia) : null;
   const linkHojaVida = hojaVida ? await subirArchivo(hojaVida) : null;
   const linkTitulo = titulo ? await subirArchivo(titulo) : null;
 
-  let detalle = `*1. Carnet:* ${linkCarnet || 'No adjunto'}\n` +
-                `*2. Antecedentes:* ${linkAntecedentes || 'No adjunto'}\n` +
-                `*3. Curriculum Vitae:* ${linkCV || 'No adjunto'}\n`;
+  let detalle = `*1. Carnet Frontal:* ${linkCarnetF || 'No adjunto'}\n` +
+                `*2. Carnet Trasero:* ${linkCarnetT || 'No adjunto'}\n` +
+                `*3. Antecedentes:* ${linkAntecedentes || 'No adjunto'}\n` +
+                `*4. Curriculum Vitae:* ${linkCV || 'No adjunto'}\n`;
 
-  if (linkLicencia) detalle += `*4. Licencia Conducir:* ${linkLicencia}\n`;
-  if (linkHojaVida) detalle += `*5. Hoja de Vida:* ${linkHojaVida}\n`;
-  if (linkTitulo) detalle += `*6. Certificado/Título:* ${linkTitulo}\n`;
+  if (linkLicencia) detalle += `*5. Licencia Conducir:* ${linkLicencia}\n`;
+  if (linkHojaVida) detalle += `*6. Hoja de Vida:* ${linkHojaVida}\n`;
+  if (linkTitulo) detalle += `*7. Certificado/Título:* ${linkTitulo}\n`;
 
-  // Aquí configuramos tu número correcto con el código de país de Chile (56)
   const miNumeroWhatsApp = "56967662502"; 
   const mensajeWA = encodeURIComponent(
     `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
