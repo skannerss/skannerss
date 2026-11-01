@@ -464,12 +464,13 @@ async function handleProviderRegister(event) {
   if (linkHojaVida) detalle += `*5. Hoja de Vida:* ${linkHojaVida}\n`;
   if (linkTitulo) detalle += `*6. Certificado/Título:* ${linkTitulo}\n`;
 
-  const miNumeroWhatsApp = "56967662502"; // Reemplaza por tu número real de celular
+  // Aquí configuramos tu número correcto con el código de país de Chile (56)
+  const miNumeroWhatsApp = "56967662502"; 
   const mensajeWA = encodeURIComponent(
     `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
     `*Nombre:* ${nombre}\n` +
     `*Especialidad:* ${especialidad}\n\n` +
-    `*DOCUMENTOS:*\n${detalle}`
+    `*DOCUMENTOS RESPALDADOS:*\n${detalle}`
   );
 
   window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
