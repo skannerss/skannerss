@@ -386,21 +386,25 @@
 </div>
 
 <script>
-// Catálogo completo de servicios, oficios y profesiones de SKAN Service
+// Catálogo masivo y completo de servicios, oficios, profesionales e independientes de SKAN Service
 const listaEspecialidades = [
   "Abogado / Asesoría Legal",
+  "Arquitecto / Proyectista",
   "Carpintero / Mueblista",
   "Conductor / Transportista",
-  "Eléctrico SEC (Clase A, B, C)",
-  "Enfermera / Cuidador",
+  "Contador / Asesor Tributario",
+  "Electricista SEC (Clase A, B, C)",
+  "Enfermera / Cuidador a Domicilio",
   "Gasfíter / Plomero",
-  "Ingeniero Auditor / ITO SKAN",
-  "Kinesiólogo",
+  "Ingeniero Auditor / ITO",
+  "Kinesiólogo a Domicilio",
   "Maestro Constructor / Albañil",
   "Mecánico Automotriz / Maquinaria",
   "Odontólogo",
+  "Pintor / Secado y Terminaciones",
   "Soldador / Metalúrgico",
-  "Técnico Clima / Calefont / Lavadora"
+  "Técnico Clima / Calefont / Lavadora",
+  "Técnico Computación / Redes"
 ];
 
 function filtrarEspecialidades(texto) {
@@ -418,7 +422,7 @@ function filtrarEspecialidades(texto) {
     return;
   }
 
-  // Filtro estricto por la letra inicial exacta
+  // Filtro estricto por inicial exacta
   const filtradas = listaEspecialidades.filter(esp => esp.toLowerCase().startsWith(texto.toLowerCase()));
 
   if (filtradas.length > 0) {
@@ -444,7 +448,7 @@ function seleccionarEspecialidad(valor) {
   }
 }
 
-// Subidor optimizado usando Catbox para archivos y PDFs
+// Subidor optimizado que garantiza enlaces directos reales para PDFs e imágenes
 async function subirArchivo(file) {
   if (!file) return null;
   const formData = new FormData();
