@@ -305,53 +305,82 @@
     </div>
 
     <!-- MODAL REGISTRO DE PRESTADOR -->
-    <div id="providerModal" class="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-cardmetal border border-neoncyan/50 rounded-xl max-w-lg w-full p-6 shadow-2xl relative">
-            <button onclick="closeProviderModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            
-            <div class="flex items-center space-x-3 mb-4">
-                <div class="w-10 h-10 rounded-lg bg-neoncyan/20 flex items-center justify-center text-neoncyan">
-                    <i class="fa-solid fa-user-tie text-xl"></i>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold text-white">Registro de Proveedor / Socio SKAN</h3>
-                    <p class="text-xs text-slate-400">Postula tu servicio técnico, profesional, de salud o ingeniería.</p>
-                </div>
-            </div>
-
-            <form onsubmit="handleProviderRegister(event)" class="space-y-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre Completo</label>
-                        <input type="text" required placeholder="Tu nombre" class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Especialidad</label>
-                        <select class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan focus:outline-none">
-                            <option>Eléctrico SEC (Clase A, B, C)</option>
-                            <option>Enfermera / Cuidador</option>
-                            <option>Odontólogo (Limpiezas a domicilio)</option>
-                            <option>Kinesiólogo</option>
-                            <option>Abogado</option>
-                            <option>Técnico Clima / Calefont / Lavadora</option>
-                            <option>Ingeniero Auditor / ITO SKAN</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-neoncyan mb-1"><i class="fa-solid fa-file-shield mr-1"></i> Credenciales / Registro SEC / Título / SIS</label>
-                    <input type="file" required accept=".pdf,image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-neoncyan/20 file:text-neoncyan">
-                </div>
-
-                <div class="pt-2">
-                    <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neoncyan to-blue-600 text-darkmetal font-bold text-sm rounded-lg hover:opacity-90 shadow-lg neon-glow transition-all">
-                        Enviar Postulación a Validación
-                    </button>
-                </div>
-            </form>
-        </div>
+<div id="providerModal" class="hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-cardmetal border border-darkborder rounded-xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h3 class="text-lg font-bold text-white">Registro de Proveedor / Socio SKAN</h3>
+        <p class="text-xs text-slate-400">Postula tu servicio técnico, profesional, de salud o ingeniería.</p>
+      </div>
+      <button onclick="closeProviderModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
     </div>
+    
+    <form onsubmit="handleProviderRegister(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre Completo</label>
+        <input type="text" required placeholder="Tu nombre" class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100" id="prov_nombre">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Especialidad</label>
+        <select class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100" id="prov_especialidad">
+          <option>Eléctrico SEC (Clase A, B, C)</option>
+          <option>Conductor / Transportista</option>
+          <option>Enfermera / Cuidador</option>
+          <option>Odontólogo</option>
+          <option>Kinesiólogo</option>
+          <option>Abogado</option>
+          <option>Técnico Clima / Calefont / Lavadora</option>
+          <option>Ingeniero Auditor / ITO SKAN</option>
+        </select>
+      </div>
+
+      <div class="border-t border-slate-700 pt-3 space-y-3">
+        <p class="text-xs font-bold text-cyan-400">Documentación Requerida (Obligatoria):</p>
+        
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">1. Carnet de Identidad (Ambos Lados)</label>
+          <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_carnet">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">2. Certificado de Antecedentes</label>
+          <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_antecedentes">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">3. Curriculum Vitae (CV)</label>
+          <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_cv">
+        </div>
+      </div>
+
+      <div class="border-t border-slate-700 pt-3 space-y-3">
+        <p class="text-xs font-bold text-yellow-400">Documentación Específica (Según Perfil):</p>
+        
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Licencia de Conducir (Solo Conductores)</label>
+          <input type="file" class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700" id="doc_licencia">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Hoja de Vida del Conductor (Solo Conductores)</label>
+          <input type="file" class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700" id="doc_hoja_vida">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Certificado de Título o Registro SEC (Profesionales / Técnicos)</label>
+          <input type="file" class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700" id="doc_titulo">
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neoncyan to-blue-600 text-darkmetal font-bold text-sm rounded-lg hover:opacity-90 shadow-lg neon-glow transition-all">
+          Enviar Postulación por WhatsApp
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
     <!-- Footer -->
     <footer class="bg-cardmetal border-t border-darkborder py-6 text-center text-xs text-slate-400">
@@ -407,49 +436,46 @@ async function subirArchivo(file) {
 async function handleProviderRegister(event) {
   event.preventDefault();
   
-  const form = event.target;
-  const nombre = form.querySelector('input[type="text"]').value;
-  const especialidad = form.querySelector('select').value;
+  const nombre = document.getElementById('prov_nombre').value;
+  const especialidad = document.getElementById('prov_especialidad').value;
   
-  // Selección de archivos desde el formulario
-  const carnetInput = form.querySelector('#doc_carnet');
-  const antecedentesInput = form.querySelector('#doc_antecedentes');
-  const cvInput = form.querySelector('#doc_cv');
-  const licenciaInput = form.querySelector('#doc_licencia');
-  const hojaVidaInput = form.querySelector('#doc_hoja_vida');
-  const tituloInput = form.querySelector('#doc_titulo');
+  const carnet = document.getElementById('doc_carnet').files[0];
+  const antecedentes = document.getElementById('doc_antecedentes').files[0];
+  const cv = document.getElementById('doc_cv').files[0];
+  const licencia = document.getElementById('doc_licencia').files[0];
+  const hojaVida = document.getElementById('doc_hoja_vida').files[0];
+  const titulo = document.getElementById('doc_titulo').files[0];
 
-  // Subida en paralelo de la documentación básica requerida para todos
-  const linkCarnet = carnetInput && carnetInput.files[0] ? await subirArchivo(carnetInput.files[0]) : "No adjuntado";
-  const linkAntecedentes = antecedentesInput && antecedentesInput.files[0] ? await subirArchivo(antecedentesInput.files[0]) : "No adjuntado";
-  const linkCV = cvInput && cvInput.files[0] ? await subirArchivo(cvInput.files[0]) : "No adjuntado";
+  // Subida de archivos obligatorios
+  const linkCarnet = await subirArchivo(carnet);
+  const linkAntecedentes = await subirArchivo(antecedentes);
+  const linkCV = await subirArchivo(cv);
   
-  // Subida opcional según perfil
-  const linkLicencia = licenciaInput && licenciaInput.files[0] ? await subirArchivo(licenciaInput.files[0]) : null;
-  const linkHojaVida = hojaVidaInput && hojaVidaInput.files[0] ? await subirArchivo(hojaVidaInput.files[0]) : null;
-  const linkTitulo = tituloInput && tituloInput.files[0] ? await subirArchivo(tituloInput.files[0]) : null;
+  // Subida de archivos condicionales
+  const linkLicencia = licencia ? await subirArchivo(licencia) : null;
+  const linkHojaVida = hojaVida ? await subirArchivo(hojaVida) : null;
+  const linkTitulo = titulo ? await subirArchivo(titulo) : null;
 
-  // Construcción del mensaje para WhatsApp
-  let detalleDocs = `*1. Carnet (Ambos Lados):* ${linkCarnet}\n` +
-                    `*2. Antecedentes:* ${linkAntecedentes}\n` +
-                    `*3. Curriculum Vitae:* ${linkCV}\n`;
+  let detalle = `*1. Carnet:* ${linkCarnet || 'No adjunto'}\n` +
+                `*2. Antecedentes:* ${linkAntecedentes || 'No adjunto'}\n` +
+                `*3. Curriculum Vitae:* ${linkCV || 'No adjunto'}\n`;
 
-  if (linkLicencia) detalleDocs += `*4. Licencia de Conducir:* ${linkLicencia}\n`;
-  if (linkHojaVida) detalleDocs += `*5. Hoja de Vida Conductor:* ${linkHojaVida}\n`;
-  if (linkTitulo) detalleDocs += `*6. Certificado de Título / SEC:* ${linkTitulo}\n`;
+  if (linkLicencia) detalle += `*4. Licencia Conducir:* ${linkLicencia}\n`;
+  if (linkHojaVida) detalle += `*5. Hoja de Vida:* ${linkHojaVida}\n`;
+  if (linkTitulo) detalle += `*6. Certificado/Título:* ${linkTitulo}\n`;
 
-  const miNumeroWhatsApp = "569XXXXXXXX"; // Reemplaza por tu número de teléfono real
+  const miNumeroWhatsApp = "56967662502"; // Reemplaza por tu número real de celular
   const mensajeWA = encodeURIComponent(
     `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
     `*Nombre:* ${nombre}\n` +
     `*Especialidad:* ${especialidad}\n\n` +
-    `*DOCUMENTACIÓN RECIBIDA:*\n${detalleDocs}`
+    `*DOCUMENTOS:*\n${detalle}`
   );
 
   window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
   
   closeProviderModal();
-  form.reset();
+  event.target.reset();
 }
     </script>
 </body>
