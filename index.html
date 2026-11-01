@@ -378,21 +378,45 @@
         });
 
         function openClientModal() { document.getElementById('clientModal').classList.remove('hidden'); }
-        function closeClientModal() { document.getElementById('clientModal').classList.add('hidden'); }
-        function openProviderModal() { document.getElementById('providerModal').classList.remove('hidden'); }
-        function closeProviderModal() { document.getElementById('providerModal').classList.add('hidden'); }
+function closeClientModal() { document.getElementById('clientModal').classList.add('hidden'); }
+function openProviderModal() { document.getElementById('providerModal').classList.remove('hidden'); }
+function closeProviderModal() { document.getElementById('providerModal').classList.add('hidden'); }
 
-        function handleClientRegister(e) {
-            e.preventDefault();
-            alert('¡Registro de cliente seguro completado! Identidad biométrica verificada.');
-            closeClientModal();
-        }
-
-        function handleProviderRegister(e) {
-            e.preventDefault();
-            alert('¡Postulación enviada a SKAN SpA! Tus antecedentes entrarán en revisión.');
-            closeProviderModal();
-        }
+function handleProviderRegister(event) {
+  event.preventDefault();
+  
+  const form = event.target;
+  const formData = new FormData(form);
+  
+  const nombre = form.querySelector('input[type="text"]').value;
+  const especialidad = form.querySelector('select').value;
+  
+  // Envío automático al correo vía Formspree
+  fetch("https://formspree.io/f/xknkyqpr", {
+    method: "POST",
+    body: formData,
+    headers: {
+      'Accept': 'application/json'
+    }
+  }).then(response => {
+    // Notificación directa a tu WhatsApp
+    const miNumeroWhatsApp = "56967662502"; // Reemplaza las X por tu número real de celular
+    const mensajeWA = encodeURIComponent(
+      `*NUEVA POSTULACIÓN EN SKAN SERVICE*\n\n` +
+      `*Nombre:* ${nombre}\n` +
+      `*Especialidad:* ${especialidad}\n` +
+      `*Estado:* Antecedentes respaldados y enviados al correo.`
+    );
+    
+    window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
+    
+    alert("¡Postulación enviada con éxito a SKAN SpA! Antecedentes notificados.");
+    closeProviderModal();
+    form.reset();
+  }).catch(error => {
+    alert("Hubo un detalle al enviar los antecedentes. Por favor reintenta.");
+  });
+}
     </script>
 </body>
 </html>
