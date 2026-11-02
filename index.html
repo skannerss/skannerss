@@ -232,6 +232,50 @@
         </div>
     </section>
 
+    <!-- Sección de Servicios Domiciliarios (#servicios) -->
+    <section id="servicios" class="py-12 bg-darkmetal border-t border-darkborder px-4 lg:px-8">
+        <div class="max-w-7xl mx-auto space-y-6">
+            <div class="text-center space-y-2">
+                <h2 class="text-2xl lg:text-3xl font-bold text-white">Servicios Domiciliarios de Alta Demanda</h2>
+                <p class="text-slate-400 text-sm">Profesionales listos para acudir a tu domicilio con total respaldo de identidad y trazabilidad.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="bg-cardmetal border border-darkborder p-4 rounded-xl">
+                    <h4 class="font-bold text-white text-sm mb-1"><i class="fa-solid fa-bolt text-neoncyan mr-2"></i> Instalaciones Eléctricas SEC</h4>
+                    <p class="text-xs text-slate-400">Certificación TE1, aumentos de empalme, tableros y resolución de fallas normadas.</p>
+                </div>
+                <div class="bg-cardmetal border border-darkborder p-4 rounded-xl">
+                    <h4 class="font-bold text-white text-sm mb-1"><i class="fa-solid fa-temperature-arrow-down text-neoncyan mr-2"></i> Climatización y Gas</h4>
+                    <p class="text-xs text-slate-400">Mantención de aire acondicionado, certificación y reparación de calefont ionizados.</p>
+                </div>
+                <div class="bg-cardmetal border border-darkborder p-4 rounded-xl">
+                    <h4 class="font-bold text-white text-sm mb-1"><i class="fa-solid fa-user-nurse text-neoncyan mr-2"></i> Asistencia Médica Domicilio</h4>
+                    <p class="text-xs text-slate-400">Enfermería clínica, kinesiólogos y cuidadores certificados bajo estrictos protocolos.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Auditoría & Ingeniería SKAN (#ingenieria) -->
+    <section id="ingenieria" class="py-12 bg-cardmetal/50 border-t border-darkborder px-4 lg:px-8">
+        <div class="max-w-7xl mx-auto space-y-6">
+            <div class="text-center space-y-2">
+                <h2 class="text-2xl lg:text-3xl font-bold text-white">Auditoría Técnica e ITO SKAN SpA</h2>
+                <p class="text-slate-400 text-sm">Respaldo corporativo experto para proyectos de construcción, industriales y gestión de calidad.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-darkmetal border border-darkborder p-5 rounded-xl space-y-2">
+                    <h4 class="font-bold text-neoncyan text-sm"><i class="fa-solid fa-helmet-safety mr-2"></i> Inspección Técnica de Obras (ITO)</h4>
+                    <p class="text-xs text-slate-300">Control estricto de partidas eléctricas, sanitarias, HVAC, estructuras metálicas y terminaciones civiles en terreno con informes directos vía Skan Service.</p>
+                </div>
+                <div class="bg-darkmetal border border-darkborder p-5 rounded-xl space-y-2">
+                    <h4 class="font-bold text-neoncyan text-sm"><i class="fa-solid fa-file-invoice-dollar mr-2"></i> Auditoría Documental & Contable Skan SpA</h4>
+                    <p class="text-xs text-slate-300">Revisión de estados de pago, cubicaciones exactas, contratos de obra, flujos tributarios y cumplimiento normativo integral para empresas y socios.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- MODAL REGISTRO CLIENTE CON SEGURIDAD BIOMÉTRICA -->
     <div id="clientModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-cardmetal border border-neoncyan/50 rounded-xl max-w-lg w-full p-6 shadow-2xl relative">
@@ -385,6 +429,11 @@
       </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="bg-cardmetal border-t border-darkborder py-6 text-center text-xs text-slate-400">
+        <p>&copy; 2026 Skan SpA. Todos los derechos reservados. Plataforma segura con validación biométrica para protección de prestadores y clientes.</p>
+    </footer>
+
     <!-- Script General & Mapa -->
     <script>
         // Inicialización Mapa Leaflet
@@ -409,6 +458,22 @@
         function closeClientModal() { document.getElementById('clientModal').classList.add('hidden'); }
         function openProviderModal() { document.getElementById('providerModal').classList.remove('hidden'); }
         function closeProviderModal() { document.getElementById('providerModal').classList.add('hidden'); }
+
+        function filterProviders() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            console.log("Filtrando mapa:", query);
+        }
+
+        function setFilter(cat) {
+            console.log("Categoría seleccionada:", cat);
+        }
+
+        function handleClientRegister(e) {
+            e.preventDefault();
+            alert("Solicitud de cliente registrada con éxito.");
+            closeClientModal();
+            e.target.reset();
+        }
 
         // Catálogo masivo y completo de servicios, oficios, profesionales e independientes de SKAN Service
         const listaEspecialidades = [
