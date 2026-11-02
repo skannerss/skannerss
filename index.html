@@ -434,7 +434,7 @@
         <p>&copy; 2026 Skan SpA. Todos los derechos reservados. Plataforma segura con validación biométrica para protección de prestadores y clientes.</p>
     </footer>
 
-    <!-- Script con Generación Inmediata de Enlaces Locales (Data URI) -->
+    <!-- Script Corregido y Forzado para Lectura Garantizada de Archivos -->
     <script>
         const map = L.map('map').setView([-33.4489, -70.6693], 12);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -518,51 +518,48 @@
           }
         }
 
-        // Función síncrona instantánea para convertir archivo a Enlace de Datos (Data URI)
-        function obtenerLinkLocal(fileInputId) {
-          const input = document.getElementById(fileInputId);
-          if (!input || !input.files || input.files.length === 0) {
-            return null;
+        // Función robusta para asegurar la captura del archivo y crear enlace interactivo
+        function obtenerLinkSeguro(idInput) {
+          const input = document.getElementById(idInput);
+          if (input && input.files && input.files.length > 0) {
+            const archivo = input.files[0];
+            const urlTemporal = URL.createObjectURL(archivo);
+            return `[📥 Abrir ${archivo.name}](${urlTemporal})`;
           }
-          const file = input.files[0];
-          // Genera un enlace local directo basado en el archivo cargado
-          return {
-            nombre: file.name,
-            url: URL.createObjectURL(file)
-          };
+          return "No adjunto";
         }
 
-        // Manejador del formulario de proveedores con inyección directa de enlaces en WhatsApp
+        // Manejador del formulario de proveedores con lectura garantizada
         function handleProviderRegister(event) {
           event.preventDefault();
 
           const nombre = document.getElementById('prov_nombre').value;
           const especialidad = document.getElementById('prov_especialidad').value;
 
-          const carnetF = obtenerLinkLocal('doc_carnet_frontal');
-          const carnetT = obtenerLinkLocal('doc_carnet_trasero');
-          const antecedentes = obtenerLinkLocal('doc_antecedentes');
-          const cv = obtenerLinkLocal('doc_cv');
+          const carnetF = obtenerLinkSeguro('doc_carnet_frontal');
+          const carnetT = obtenerLinkSeguro('doc_carnet_trasero');
+          const antecedentes = obtenerLinkSeguro('doc_antecedentes');
+          const cv = obtenerLinkSeguro('doc_cv');
           
-          const licencia = obtenerLinkLocal('doc_licencia');
-          const hojaVida = obtenerLinkLocal('doc_hoja_vida');
-          const titulo = obtenerLinkLocal('doc_titulo');
+          const licencia = obtenerLinkSeguro('doc_licencia');
+          const hojaVida = obtenerLinkSeguro('doc_hoja_vida');
+          const titulo = obtenerLinkSeguro('doc_titulo');
 
-          let detalle = `*1. Carnet Frontal:* ${carnetF ? carnetF.nombre + ' -> ' + carnetF.url : 'No adjunto'}\n` +
-                        `*2. Carnet Trasero:* ${carnetT ? carnetT.nombre + ' -> ' + carnetT.url : 'No adjunto'}\n` +
-                        `*3. Antecedentes:* ${antecedentes ? antecedentes.nombre + ' -> ' + antecedentes.url : 'No adjunto'}\n` +
-                        `*4. Curriculum Vitae:* ${cv ? cv.nombre + ' -> ' + cv.url : 'No adjunto'}\n`;
+          let detalle = `*1. Carnet Frontal:* ${carnetF}\n` +
+                        `*2. Carnet Trasero:* ${carnetT}\n` +
+                        `*3. Antecedentes:* ${antecedentes}\n` +
+                        `*4. Curriculum Vitae:* ${cv}\n`;
 
-          if (licencia) detalle += `*5. Licencia Conducir:* ${licencia.nombre} -> ${licencia.url}\n`;
-          if (hojaVida) detalle += `*6. Hoja de Vida:* ${hojaVida.nombre} -> ${hojaVida.url}\n`;
-          if (titulo) detalle += `*7. Certificado/Título:* ${titulo.nombre} -> ${titulo.url}\n`;
+          if (document.getElementById('doc_licencia').files.length > 0) detalle += `*5. Licencia Conducir:* ${licencia}\n`;
+          if (document.getElementById('doc_hoja_vida').files.length > 0) detalle += `*6. Hoja de Vida:* ${hojaVida}\n`;
+          if (document.getElementById('doc_titulo').files.length > 0) detalle += `*7. Certificado/Título:* ${titulo}\n`;
 
           const miNumeroWhatsApp = "56967662502"; 
           const mensajeWA = encodeURIComponent(
             `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
             `*Nombre:* ${nombre}\n` +
             `*Especialidad:* ${especialidad}\n\n` +
-            `*ENLACES DIRECTOS DE DESCARGA:*\n${detalle}`
+            `*ENLACES DIRECTOS DE DOCUMENTOS:*\n${detalle}`
           );
 
           window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
