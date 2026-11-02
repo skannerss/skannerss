@@ -537,7 +537,7 @@
           }
         }
 
-        // Subidor optimizado para garantizar enlaces directos reales para PDFs e imágenes
+        // Subidor optimizado y sincronizado para garantizar enlaces directos reales para PDFs e imágenes
         async function subirArchivo(file) {
           if (!file) return null;
           const formData = new FormData();
@@ -549,12 +549,12 @@
               method: "POST",
               body: formData
             });
-            const url = await res.text();
-            if (url && url.startsWith('http')) {
-              return url.trim();
+            const text = await res.text();
+            if (text && text.startsWith('http')) {
+              return text.trim();
             }
           } catch (e) {
-            console.error("Error subiendo archivo:", e);
+            console.error("Error crítico en subida:", e);
           }
           return null;
         }
@@ -562,53 +562,67 @@
         async function handleProviderRegister(event) {
           event.preventDefault();
           
-          const nombre = document.getElementById('prov_nombre').value;
-          const especialidad = document.getElementById('prov_especialidad').value;
-          
-          const carnetFrontal = document.getElementById('doc_carnet_frontal').files[0];
-          const carnetTrasero = document.getElementById('doc_carnet_trasero').files[0];
-          const antecedentes = document.getElementById('doc_antecedentes').files[0];
-          const cv = document.getElementById('doc_cv').files[0];
-          
-          const licenciaInput = document.getElementById('doc_licencia');
-          const hojaVidaInput = document.getElementById('doc_hoja_vida');
-          const tituloInput = document.getElementById('doc_titulo');
+          const btnSubmit = event.target.querySelector('button[type="submit"]');
+          const textoOriginal = btnSubmit.innerHTML;
+          btnSubmit.innerHTML = "Subiendo documentos y generando enlaces...";
+          btnSubmit.disabled = true;
 
-          const licencia = licenciaInput && licenciaInput.files[0] ? licenciaInput.files[0] : null;
-          const hojaVida = hojaVidaInput && hojaVidaInput.files[0] ? hojaVidaInput.files[0] : null;
-          const titulo = tituloInput && tituloInput.files[0] ? tituloInput.files[0] : null;
+          try {
+            const nombre = document.getElementById('prov_nombre').value;
+            const especialidad = document.getElementById('prov_especialidad').value;
+            
+            const carnetFrontal = document.getElementById('doc_carnet_frontal').files[0];
+            const carnetTrasero = document.getElementById('doc_carnet_trasero').files[0];
+            const antecedentes = document.getElementById('doc_antecedentes').files[0];
+            const cv = document.getElementById('doc_cv').files[0];
+            
+            const licenciaInput = document.getElementById('doc_licencia');
+            const hojaVidaInput = document.getElementById('doc_hoja_vida');
+            const tituloInput = document.getElementById('doc_titulo');
 
-          const linkCarnetF = await subirArchivo(carnetFrontal);
-          const linkCarnetT = await subirArchivo(carnetTrasero);
-          const linkAntecedentes = await subirArchivo(antecedentes);
-          const linkCV = await subirArchivo(cv);
-          
-          const linkLicencia = licencia ? await subirArchivo(licencia) : null;
-          const linkHojaVida = hojaVida ? await subirArchivo(hojaVida) : null;
-          const linkTitulo = titulo ? await subirArchivo(titulo) : null;
+            const licencia = licenciaInput && licenciaInput.files[0] ? licenciaInput.files[0] : null;
+            const hojaVida = hojaVidaInput && hojaVidaInput.files[0] ? hojaVidaInput.files[0] : null;
+            const titulo = tituloInput && tituloInput.files[0] ? tituloInput.files[0] : null;
 
-          let detalle = `*1. Carnet Frontal:* ${linkCarnetF || 'No adjunto'}\n` +
-                        `*2. Carnet Trasero:* ${linkCarnetT || 'No adjunto'}\n` +
-                        `*3. Antecedentes:* ${linkAntecedentes || 'No adjunto'}\n` +
-                        `*4. Curriculum Vitae:* ${linkCV || 'No adjunto'}\n`;
+            // Sincronización estricta con await para evitar fallos de lectura en los archivos
+            const linkCarnetF = await subirArchivo(carnetFrontal);
+            const linkCarnetT = await subirArchivo(carnetTrasero);
+            const linkAntecedentes = await subirArchivo(antecedentes);
+            const linkCV = await subirArchivo(cv);
+            
+            const linkLicencia = licencia ? await subirArchivo(licencia) : null;
+            const linkHojaVida = hojaVida ? await subirArchivo(hojaVida) : null;
+            const linkTitulo = titulo ? await subirArchivo(titulo) : null;
 
-          if (linkLicencia) detalle += `*5. Licencia Conducir:* ${linkLicencia}\n`;
-          if (linkHojaVida) detalle += `*6. Hoja de Vida:* ${linkHojaVida}\n`;
-          if (linkTitulo) detalle += `*7. Certificado/Título:* ${linkTitulo}\n`;
+            let detalle = `*1. Carnet Frontal:* ${linkCarnetF || 'No adjunto'}\n` +
+                          `*2. Carnet Trasero:* ${linkCarnetT || 'No adjunto'}\n` +
+                          `*3. Antecedentes:* ${linkAntecedentes || 'No adjunto'}\n` +
+                          `*4. Curriculum Vitae:* ${linkCV || 'No adjunto'}\n`;
 
-          const miNumeroWhatsApp = "56967662502"; 
-          const mensajeWA = encodeURIComponent(
-            `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
-            `*Nombre:* ${nombre}\n` +
-            `*Especialidad:* ${especialidad}\n\n` +
-            `*DOCUMENTOS RESPALDADOS:*\n${detalle}`
-          );
+            if (linkLicencia) detalle += `*5. Licencia Conducir:* ${linkLicencia}\n`;
+            if (linkHojaVida) detalle += `*6. Hoja de Vida:* ${linkHojaVida}\n`;
+            if (linkTitulo) detalle += `*7. Certificado/Título:* ${linkTitulo}\n`;
 
-          window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
-          
-          closeProviderModal();
-          event.target.reset();
-          document.getElementById('seccionConductor').classList.add('hidden');
+            const miNumeroWhatsApp = "56967662502"; 
+            const mensajeWA = encodeURIComponent(
+              `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
+              `*Nombre:* ${nombre}\n` +
+              `*Especialidad:* ${especialidad}\n\n` +
+              `*DOCUMENTOS RESPALDADOS:*\n${detalle}`
+            );
+
+            window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
+            
+            closeProviderModal();
+            event.target.reset();
+            document.getElementById('seccionConductor').classList.add('hidden');
+          } catch (error) {
+            console.error("Error en el proceso de postulación:", error);
+            alert("Hubo un error al procesar los archivos. Por favor, inténtalo de nuevo.");
+          } finally {
+            btnSubmit.innerHTML = textoOriginal;
+            btnSubmit.disabled = false;
+          }
         }
     </script>
 </body>
