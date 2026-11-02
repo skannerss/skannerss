@@ -422,7 +422,7 @@
 
           <div class="pt-2">
             <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neoncyan to-blue-600 text-darkmetal font-bold text-sm rounded-lg hover:opacity-90 shadow-lg neon-glow transition-all">
-              Generar Reporte y Enviar a WhatsApp
+              Enviar Postulación a WhatsApp
             </button>
           </div>
         </form>
@@ -434,7 +434,7 @@
         <p>&copy; 2026 Skan SpA. Todos los derechos reservados. Plataforma segura con validación biométrica para protección de prestadores y clientes.</p>
     </footer>
 
-    <!-- Script Definitivo sin Errores 404 (Registro Exacto y Limpio) -->
+    <!-- Script Estable y Definitivo (Sin Enlaces Rotos) -->
     <script>
         const map = L.map('map').setView([-33.4489, -70.6693], 12);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -521,7 +521,7 @@
         function obtenerNombreArchivo(idInput) {
           const input = document.getElementById(idInput);
           if (input && input.files && input.files.length > 0) {
-            return `✅ Adjunto (${input.files[0].name})`;
+            return `Adjunto (${input.files[0].name})`;
           }
           return "No adjunto";
         }
@@ -541,21 +541,21 @@
           const hojaVida = obtenerNombreArchivo('doc_hoja_vida');
           const titulo = obtenerNombreArchivo('doc_titulo');
 
-          let detalle = `*1. Carnet Frontal:* ${carnetF}\n` +
-                        `*2. Carnet Trasero:* ${carnetT}\n` +
-                        `*3. Antecedentes:* ${antecedentes}\n` +
-                        `*4. Curriculum Vitae:* ${cv}\n`;
+          let detalle = `1. Carnet Frontal: ${carnetF}\n` +
+                        `2. Carnet Trasero: ${carnetT}\n` +
+                        `3. Antecedentes: ${antecedentes}\n` +
+                        `4. Curriculum Vitae: ${cv}\n`;
 
-          if (document.getElementById('doc_licencia').files.length > 0) detalle += `*5. Licencia Conducir:* ${licencia}\n`;
-          if (document.getElementById('doc_hoja_vida').files.length > 0) detalle += `*6. Hoja de Vida:* ${hojaVida}\n`;
-          if (document.getElementById('doc_titulo').files.length > 0) detalle += `*7. Certificado/Título:* ${titulo}\n`;
+          if (document.getElementById('doc_licencia').files.length > 0) detalle += `5. Licencia Conducir: ${licencia}\n`;
+          if (document.getElementById('doc_hoja_vida').files.length > 0) detalle += `6. Hoja de Vida: ${hojaVida}\n`;
+          if (document.getElementById('doc_titulo').files.length > 0) detalle += `7. Certificado/Título: ${titulo}\n`;
 
           const miNumeroWhatsApp = "56967662502"; 
           const mensajeWA = encodeURIComponent(
-            `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
-            `*Nombre:* ${nombre}\n` +
-            `*Especialidad:* ${especialidad}\n\n` +
-            `*DOCUMENTOS SELECCIONADOS EN FORMULARIO:*\n${detalle}\n` +
+            `NUEVA POSTULACIÓN SKAN SERVICE\n\n` +
+            `Nombre: ${nombre}\n` +
+            `Especialidad: ${especialidad}\n\n` +
+            `DOCUMENTOS SELECCIONADOS EN FORMULARIO:\n${detalle}\n` +
             `(Adjunto los archivos correspondientes directamente a este chat)`
           );
 
