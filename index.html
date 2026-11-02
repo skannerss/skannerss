@@ -377,7 +377,7 @@
           </div>
 
           <div class="border-t border-slate-700 pt-3 space-y-3">
-            <p class="text-xs font-bold text-cyan-400">Documentación Requerida (Obligatoria):</p>
+            <p class="text-xs font-bold text-cyan-400">Documentación Requerida (Obligatoria - Acepta imágenes, PDF, Word, etc.):</p>
             
             <div>
               <label class="block text-xs text-slate-300 mb-1">1. Carnet de Identidad (Lado Frontal)</label>
@@ -422,7 +422,7 @@
 
           <div class="pt-2">
             <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neoncyan to-blue-600 text-darkmetal font-bold text-sm rounded-lg hover:opacity-90 shadow-lg neon-glow transition-all">
-              Enviar Postulación por WhatsApp
+              Subir Archivos y Enviar por WhatsApp
             </button>
           </div>
         </form>
@@ -434,8 +434,8 @@
         <p>&copy; 2026 Skan SpA. Todos los derechos reservados. Plataforma segura con validación biométrica para protección de prestadores y clientes.</p>
     </footer>
 
-    <!-- Script General & Lógica (Ubicado correctamente dentro de la etiqueta script) -->
- <script>
+    <!-- Script General & Lógica con Subida Automática de Archivos para WhatsApp -->
+    <script>
         // Inicialización Mapa Leaflet
         const map = L.map('map').setView([-33.4489, -70.6693], 12);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -536,7 +536,7 @@
           }
         }
 
-        // Función para subir archivos automáticamente a la red y obtener enlaces web directos
+        // Función automática para subir cualquier archivo a internet y retornar el link web directo
         async function subirArchivoAutomatico(fileInputId) {
           const input = document.getElementById(fileInputId);
           if (!input || !input.files || input.files.length === 0) {
@@ -566,7 +566,7 @@
           return null;
         }
 
-        // Manejador del registro de proveedores con subida automática de enlaces
+        // Manejador del registro de proveedores con subida automática de archivos y enlaces directos en WhatsApp
         async function handleProviderRegister(event) {
           event.preventDefault();
           
@@ -579,7 +579,7 @@
             const nombre = document.getElementById('prov_nombre').value;
             const especialidad = document.getElementById('prov_especialidad').value;
 
-            // Subimos cada documento de manera secuencial y esperamos su enlace web
+            // Subida secuencial automática de cada archivo adjuntado
             const linkCarnetF = await subirArchivoAutomatico('doc_carnet_frontal');
             const linkCarnetT = await subirArchivoAutomatico('doc_carnet_trasero');
             const linkAntecedentes = await subirArchivoAutomatico('doc_antecedentes');
