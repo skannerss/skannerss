@@ -434,8 +434,8 @@
         <p>&copy; 2026 Skan SpA. Todos los derechos reservados. Plataforma segura con validación biométrica para protección de prestadores y clientes.</p>
     </footer>
 
-    <!-- Script General & Lógica -->
-    <script>
+    <!-- Script General & Lógica (Ubicado correctamente dentro de la etiqueta script) -->
+ <script>
         // Inicialización Mapa Leaflet
         const map = L.map('map').setView([-33.4489, -70.6693], 12);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -475,7 +475,7 @@
             e.target.reset();
         }
 
-        // Catálogo masivo y completo de servicios, oficios, profesionales e independientes
+        // Catálogo de especialidades
         const listaEspecialidades = [
           "Abogado / Asesoría Legal",
           "Arquitecto / Proyectista",
@@ -511,7 +511,6 @@
             return;
           }
 
-          // Filtro estricto por inicial exacta
           const filtradas = listaEspecialidades.filter(esp => esp.toLowerCase().startsWith(texto.toLowerCase()));
 
           if (filtradas.length > 0) {
@@ -537,50 +536,88 @@
           }
         }
 
-        // Manejador del formulario de proveedores sin errores visuales ni bloques de red
-        function handleProviderRegister(event) {
+        // Función para subir archivos automáticamente a la red y obtener enlaces web directos
+        async function subirArchivoAutomatico(fileInputId) {
+          const input = document.getElementById(fileInputId);
+          if (!input || !input.files || input.files.length === 0) {
+            return null;
+          }
+          
+          const file = input.files[0];
+          const formData = new FormData();
+          formData.append('reqtype', 'fileupload');
+          formData.append('fileToUpload', file);
+
+          try {
+            const response = await fetch("https://catbox.moe/user/api.php", {
+              method: "POST",
+              body: formData
+            });
+            
+            if (response.ok) {
+              const url = await response.text();
+              if (url && url.startsWith('http')) {
+                return url.trim();
+              }
+            }
+          } catch (error) {
+            console.error("Error al subir archivo:", fileInputId, error);
+          }
+          return null;
+        }
+
+        // Manejador del registro de proveedores con subida automática de enlaces
+        async function handleProviderRegister(event) {
           event.preventDefault();
+          
+          const btnSubmit = event.target.querySelector('button[type="submit"]');
+          const textoOriginal = btnSubmit.innerHTML;
+          btnSubmit.innerHTML = "Subiendo documentos a internet...";
+          btnSubmit.disabled = true;
 
-          const nombre = document.getElementById('prov_nombre').value;
-          const especialidad = document.getElementById('prov_especialidad').value;
+          try {
+            const nombre = document.getElementById('prov_nombre').value;
+            const especialidad = document.getElementById('prov_especialidad').value;
 
-          const carnetFrontal = document.getElementById('doc_carnet_frontal').files[0];
-          const carnetTrasero = document.getElementById('doc_carnet_trasero').files[0];
-          const antecedentes = document.getElementById('doc_antecedentes').files[0];
-          const cv = document.getElementById('doc_cv').files[0];
+            // Subimos cada documento de manera secuencial y esperamos su enlace web
+            const linkCarnetF = await subirArchivoAutomatico('doc_carnet_frontal');
+            const linkCarnetT = await subirArchivoAutomatico('doc_carnet_trasero');
+            const linkAntecedentes = await subirArchivoAutomatico('doc_antecedentes');
+            const linkCV = await subirArchivoAutomatico('doc_cv');
+            
+            const linkLicencia = await subirArchivoAutomatico('doc_licencia');
+            const linkHojaVida = await subirArchivoAutomatico('doc_hoja_vida');
+            const linkTitulo = await subirArchivoAutomatico('doc_titulo');
 
-          const licenciaInput = document.getElementById('doc_licencia');
-          const hojaVidaInput = document.getElementById('doc_hoja_vida');
-          const tituloInput = document.getElementById('doc_titulo');
+            let detalle = `*1. Carnet Frontal:* ${linkCarnetF || 'No adjunto'}\n` +
+                          `*2. Carnet Trasero:* ${linkCarnetT || 'No adjunto'}\n` +
+                          `*3. Antecedentes:* ${linkAntecedentes || 'No adjunto'}\n` +
+                          `*4. Curriculum Vitae:* ${linkCV || 'No adjunto'}\n`;
 
-          const licencia = licenciaInput && licenciaInput.files[0] ? licenciaInput.files[0] : null;
-          const hojaVida = hojaVidaInput && hojaVidaInput.files[0] ? hojaVidaInput.files[0] : null;
-          const titulo = tituloInput && tituloInput.files[0] ? tituloInput.files[0] : null;
+            if (linkLicencia) detalle += `*5. Licencia Conducir:* ${linkLicencia}\n`;
+            if (linkHojaVida) detalle += `*6. Hoja de Vida:* ${linkHojaVida}\n`;
+            if (linkTitulo) detalle += `*7. Certificado/Título:* ${linkTitulo}\n`;
 
-          // Confirmación explícita de archivos adjuntados
-          let detalle = `*1. Carnet Frontal:* ${carnetFrontal ? 'Adjuntado (' + carnetFrontal.name + ')' : 'No adjunto'}\n` +
-                        `*2. Carnet Trasero:* ${carnetTrasero ? 'Adjuntado (' + carnetTrasero.name + ')' : 'No adjunto'}\n` +
-                        `*3. Antecedentes:* ${antecedentes ? 'Adjuntado (' + antecedentes.name + ')' : 'No adjunto'}\n` +
-                        `*4. Curriculum Vitae:* ${cv ? 'Adjuntado (' + cv.name + ')' : 'No adjunto'}\n`;
+            const miNumeroWhatsApp = "56967662502"; 
+            const mensajeWA = encodeURIComponent(
+              `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
+              `*Nombre:* ${nombre}\n` +
+              `*Especialidad:* ${especialidad}\n\n` +
+              `*ENLACES DIRECTOS DE DOCUMENTOS:*\n${detalle}`
+            );
 
-          if (licencia) detalle += `*5. Licencia Conducir:* Adjuntado (${licencia.name})\n`;
-          if (hojaVida) detalle += `*6. Hoja de Vida:* Adjuntado (${hojaVida.name})\n`;
-          if (titulo) detalle += `*7. Certificado/Título:* Adjuntado (${titulo.name})\n`;
-
-          const miNumeroWhatsApp = "56967662502"; 
-          const mensajeWA = encodeURIComponent(
-            `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
-            `*Nombre:* ${nombre}\n` +
-            `*Especialidad:* ${especialidad}\n\n` +
-            `*DOCUMENTOS SELECCIONADOS EN FORMULARIO:*\n${detalle}\n` +
-            `_(Adjunto los archivos correspondientes a este chat)_`
-          );
-
-          window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
-
-          closeProviderModal();
-          event.target.reset();
-          document.getElementById('seccionConductor').classList.add('hidden');
+            window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
+            
+            closeProviderModal();
+            event.target.reset();
+            document.getElementById('seccionConductor').classList.add('hidden');
+          } catch (error) {
+            console.error("Error crítico en el proceso:", error);
+            alert("Hubo un error al subir los archivos. Por favor, verifica tu conexión e inténtalo de nuevo.");
+          } finally {
+            btnSubmit.innerHTML = textoOriginal;
+            btnSubmit.disabled = false;
+          }
         }
     </script>
 </body>
