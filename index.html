@@ -359,46 +359,51 @@
           <button onclick="closeProviderModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
         </div>
         
-        <form onsubmit="handleProviderRegister(event)" class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre Completo</label>
-            <input type="text" required placeholder="Tu nombre" class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100" id="prov_nombre">
-          </div>
+        // Manejador blindado sin bloqueos de red ni fallos de CORS
+function handleProviderRegister(event) {
+  event.preventDefault();
 
-          <!-- Buscador Inteligente Estricto (Filtro por inicial) -->
-          <div class="relative">
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Especialidad (Filtra por inicial, ej: E, C, A...)</label>
-            <input type="text" id="prov_especialidad" required placeholder="Escribe para buscar..." 
-                   oninput="filtrarEspecialidades(this.value)" autocomplete="off"
-                   class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan outline-none">
-            
-            <!-- Lista de sugerencias automáticas -->
-            <div id="sugerenciasEspecialidad" class="hidden absolute left-0 right-0 mt-1 bg-darkmetal border border-darkborder rounded-lg shadow-xl z-50 max-h-40 overflow-y-auto"></div>
-          </div>
+  const nombre = document.getElementById('prov_nombre').value;
+  const especialidad = document.getElementById('prov_especialidad').value;
 
-          <div class="border-t border-slate-700 pt-3 space-y-3">
-            <p class="text-xs font-bold text-cyan-400">Documentación Requerida (Obligatoria):</p>
-            
-            <div>
-              <label class="block text-xs text-slate-300 mb-1">1. Carnet de Identidad (Lado Frontal)</label>
-              <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_carnet_frontal">
-            </div>
+  const carnetFrontal = document.getElementById('doc_carnet_frontal').files[0];
+  const carnetTrasero = document.getElementById('doc_carnet_trasero').files[0];
+  const antecedentes = document.getElementById('doc_antecedentes').files[0];
+  const cv = document.getElementById('doc_cv').files[0];
 
-            <div>
-              <label class="block text-xs text-slate-300 mb-1">2. Carnet de Identidad (Lado Trasero)</label>
-              <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_carnet_trasero">
-            </div>
+  const licenciaInput = document.getElementById('doc_licencia');
+  const hojaVidaInput = document.getElementById('doc_hoja_vida');
+  const tituloInput = document.getElementById('doc_titulo');
 
-            <div>
-              <label class="block text-xs text-slate-300 mb-1">3. Certificado de Antecedentes</label>
-              <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_antecedentes">
-            </div>
+  const licencia = licenciaInput && licenciaInput.files[0] ? licenciaInput.files[0] : null;
+  const hojaVida = hojaVidaInput && hojaVidaInput.files[0] ? hojaVidaInput.files[0] : null;
+  const titulo = tituloInput && tituloInput.files[0] ? tituloInput.files[0] : null;
 
-            <div>
-              <label class="block text-xs text-slate-300 mb-1">4. Curriculum Vitae (CV)</label>
-              <input type="file" required class="w-full text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" id="doc_cv">
-            </div>
-          </div>
+  // Confirmación explícita del estado de cada archivo adjuntado en el formulario
+  let detalle = `*1. Carnet Frontal:* ${carnetFrontal ? 'Adjuntado (' + carnetFrontal.name + ')' : 'No adjunto'}\n` +
+                `*2. Carnet Trasero:* ${carnetTrasero ? 'Adjuntado (' + carnetTrasero.name + ')' : 'No adjunto'}\n` +
+                `*3. Antecedentes:* ${antecedentes ? 'Adjuntado (' + antecedentes.name + ')' : 'No adjunto'}\n` +
+                `*4. Curriculum Vitae:* ${cv ? 'Adjuntado (' + cv.name + ')' : 'No adjunto'}\n`;
+
+  if (licencia) detalle += `*5. Licencia Conducir:* Adjuntado (${licencia.name})\n`;
+  if (hojaVida) detalle += `*6. Hoja de Vida:* Adjuntado (${hojaVida.name})\n`;
+  if (titulo) detalle += `*7. Certificado/Título:* Adjuntado (${titulo.name})\n`;
+
+  const miNumeroWhatsApp = "56967662502"; 
+  const mensajeWA = encodeURIComponent(
+    `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
+    `*Nombre:* ${nombre}\n` +
+    `*Especialidad:* ${especialidad}\n\n` +
+    `*DOCUMENTOS SELECCIONADOS EN FORMULARIO:*\n${detalle}\n` +
+    `_(Adjunto los archivos correspondientes a este chat)_`
+  );
+
+  window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
+
+  closeProviderModal();
+  event.target.reset();
+  document.getElementById('seccionConductor').classList.add('hidden');
+}
 
           <!-- Sección Condicional para Conductores -->
           <div id="seccionConductor" class="hidden border-t border-slate-700 pt-3 space-y-3 bg-yellow-950/20 p-2 rounded-lg">
