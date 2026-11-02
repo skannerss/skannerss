@@ -537,10 +537,11 @@
           }
         }
 
-       // Subidor infalible con validación explícita de archivos
+// Subidor robusto con validación de tipo y depuración directa
 async function subirArchivo(fileInputId) {
   const input = document.getElementById(fileInputId);
   if (!input || !input.files || input.files.length === 0) {
+    console.log("No hay archivo en:", fileInputId);
     return null;
   }
   
@@ -550,16 +551,19 @@ async function subirArchivo(fileInputId) {
   formData.append('fileToUpload', file);
 
   try {
-    const res = await fetch("https://catbox.moe/user/api.php", {
+    const response = await fetch("https://catbox.moe/user/api.php", {
       method: "POST",
       body: formData
     });
-    const text = await res.text();
-    if (text && text.startsWith('http')) {
-      return text.trim();
+    
+    if (response.ok) {
+      const url = await response.text();
+      if (url && url.startsWith('http')) {
+        return url.trim();
+      }
     }
-  } catch (e) {
-    console.error("Error al subir archivo desde el input:", fileInputId, e);
+  } catch (error) {
+    console.error("Fallo de red al subir:", fileInputId, error);
   }
   return null;
 }
@@ -569,14 +573,14 @@ async function handleProviderRegister(event) {
   
   const btnSubmit = event.target.querySelector('button[type="submit"]');
   const textoOriginal = btnSubmit.innerHTML;
-  btnSubmit.innerHTML = "Subiendo documentos a la red...";
+  btnSubmit.innerHTML = "Procesando documentos y generando enlaces...";
   btnSubmit.disabled = true;
 
   try {
     const nombre = document.getElementById('prov_nombre').value;
     const especialidad = document.getElementById('prov_especialidad').value;
     
-    // Subida directa apuntando al ID exacto del input
+    // Ejecución secuencial asegurada para cada documento obligatorio
     const linkCarnetF = await subirArchivo('doc_carnet_frontal');
     const linkCarnetT = await subirArchivo('doc_carnet_trasero');
     const linkAntecedentes = await subirArchivo('doc_antecedentes');
@@ -609,8 +613,8 @@ async function handleProviderRegister(event) {
     event.target.reset();
     document.getElementById('seccionConductor').classList.add('hidden');
   } catch (error) {
-    console.error("Error en postulación:", error);
-    alert("Error al procesar los archivos. Inténtalo nuevamente.");
+    console.error("Error general en el registro:", error);
+    alert("Ocurrió un error al procesar los archivos. Por favor, verifica tu conexión.");
   } finally {
     btnSubmit.innerHTML = textoOriginal;
     btnSubmit.disabled = false;
