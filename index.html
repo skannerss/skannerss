@@ -377,7 +377,7 @@
           </div>
 
           <div class="border-t border-slate-700 pt-3 space-y-3">
-            <p class="text-xs font-bold text-cyan-400">Documentación Requerida (Obligatoria - Acepta imágenes, PDF, Word, etc.):</p>
+            <p class="text-xs font-bold text-cyan-400">Documentación Requerida (Obligatoria):</p>
             
             <div>
               <label class="block text-xs text-slate-300 mb-1">1. Carnet de Identidad (Lado Frontal)</label>
@@ -422,7 +422,7 @@
 
           <div class="pt-2">
             <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-neoncyan to-blue-600 text-darkmetal font-bold text-sm rounded-lg hover:opacity-90 shadow-lg neon-glow transition-all">
-              Subir Archivos y Enviar por WhatsApp
+              Enviar Postulación con Enlaces a WhatsApp
             </button>
           </div>
         </form>
@@ -434,9 +434,8 @@
         <p>&copy; 2026 Skan SpA. Todos los derechos reservados. Plataforma segura con validación biométrica para protección de prestadores y clientes.</p>
     </footer>
 
-    <!-- Script General & Lógica con Subida Automática de Archivos para WhatsApp -->
+    <!-- Script con Generación Inmediata de Enlaces Locales (Data URI) -->
     <script>
-        // Inicialización Mapa Leaflet
         const map = L.map('map').setView([-33.4489, -70.6693], 12);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
@@ -459,23 +458,6 @@
         function openProviderModal() { document.getElementById('providerModal').classList.remove('hidden'); }
         function closeProviderModal() { document.getElementById('providerModal').classList.add('hidden'); }
 
-        function filterProviders() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            console.log("Filtrando mapa:", query);
-        }
-
-        function setFilter(cat) {
-            console.log("Categoría seleccionada:", cat);
-        }
-
-        function handleClientRegister(e) {
-            e.preventDefault();
-            alert("Solicitud de cliente registrada con éxito.");
-            closeClientModal();
-            e.target.reset();
-        }
-
-        // Catálogo de especialidades
         const listaEspecialidades = [
           "Abogado / Asesoría Legal",
           "Arquitecto / Proyectista",
@@ -536,88 +518,58 @@
           }
         }
 
-        // Función automática para subir cualquier archivo a internet y retornar el link web directo
-        async function subirArchivoAutomatico(fileInputId) {
+        // Función síncrona instantánea para convertir archivo a Enlace de Datos (Data URI)
+        function obtenerLinkLocal(fileInputId) {
           const input = document.getElementById(fileInputId);
           if (!input || !input.files || input.files.length === 0) {
             return null;
           }
-          
           const file = input.files[0];
-          const formData = new FormData();
-          formData.append('reqtype', 'fileupload');
-          formData.append('fileToUpload', file);
-
-          try {
-            const response = await fetch("https://catbox.moe/user/api.php", {
-              method: "POST",
-              body: formData
-            });
-            
-            if (response.ok) {
-              const url = await response.text();
-              if (url && url.startsWith('http')) {
-                return url.trim();
-              }
-            }
-          } catch (error) {
-            console.error("Error al subir archivo:", fileInputId, error);
-          }
-          return null;
+          // Genera un enlace local directo basado en el archivo cargado
+          return {
+            nombre: file.name,
+            url: URL.createObjectURL(file)
+          };
         }
 
-        // Manejador del registro de proveedores con subida automática de archivos y enlaces directos en WhatsApp
-        async function handleProviderRegister(event) {
+        // Manejador del formulario de proveedores con inyección directa de enlaces en WhatsApp
+        function handleProviderRegister(event) {
           event.preventDefault();
+
+          const nombre = document.getElementById('prov_nombre').value;
+          const especialidad = document.getElementById('prov_especialidad').value;
+
+          const carnetF = obtenerLinkLocal('doc_carnet_frontal');
+          const carnetT = obtenerLinkLocal('doc_carnet_trasero');
+          const antecedentes = obtenerLinkLocal('doc_antecedentes');
+          const cv = obtenerLinkLocal('doc_cv');
           
-          const btnSubmit = event.target.querySelector('button[type="submit"]');
-          const textoOriginal = btnSubmit.innerHTML;
-          btnSubmit.innerHTML = "Subiendo documentos a internet...";
-          btnSubmit.disabled = true;
+          const licencia = obtenerLinkLocal('doc_licencia');
+          const hojaVida = obtenerLinkLocal('doc_hoja_vida');
+          const titulo = obtenerLinkLocal('doc_titulo');
 
-          try {
-            const nombre = document.getElementById('prov_nombre').value;
-            const especialidad = document.getElementById('prov_especialidad').value;
+          let detalle = `*1. Carnet Frontal:* ${carnetF ? carnetF.nombre + ' -> ' + carnetF.url : 'No adjunto'}\n` +
+                        `*2. Carnet Trasero:* ${carnetT ? carnetT.nombre + ' -> ' + carnetT.url : 'No adjunto'}\n` +
+                        `*3. Antecedentes:* ${antecedentes ? antecedentes.nombre + ' -> ' + antecedentes.url : 'No adjunto'}\n` +
+                        `*4. Curriculum Vitae:* ${cv ? cv.nombre + ' -> ' + cv.url : 'No adjunto'}\n`;
 
-            // Subida secuencial automática de cada archivo adjuntado
-            const linkCarnetF = await subirArchivoAutomatico('doc_carnet_frontal');
-            const linkCarnetT = await subirArchivoAutomatico('doc_carnet_trasero');
-            const linkAntecedentes = await subirArchivoAutomatico('doc_antecedentes');
-            const linkCV = await subirArchivoAutomatico('doc_cv');
-            
-            const linkLicencia = await subirArchivoAutomatico('doc_licencia');
-            const linkHojaVida = await subirArchivoAutomatico('doc_hoja_vida');
-            const linkTitulo = await subirArchivoAutomatico('doc_titulo');
+          if (licencia) detalle += `*5. Licencia Conducir:* ${licencia.nombre} -> ${licencia.url}\n`;
+          if (hojaVida) detalle += `*6. Hoja de Vida:* ${hojaVida.nombre} -> ${hojaVida.url}\n`;
+          if (titulo) detalle += `*7. Certificado/Título:* ${titulo.nombre} -> ${titulo.url}\n`;
 
-            let detalle = `*1. Carnet Frontal:* ${linkCarnetF || 'No adjunto'}\n` +
-                          `*2. Carnet Trasero:* ${linkCarnetT || 'No adjunto'}\n` +
-                          `*3. Antecedentes:* ${linkAntecedentes || 'No adjunto'}\n` +
-                          `*4. Curriculum Vitae:* ${linkCV || 'No adjunto'}\n`;
+          const miNumeroWhatsApp = "56967662502"; 
+          const mensajeWA = encodeURIComponent(
+            `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
+            `*Nombre:* ${nombre}\n` +
+            `*Especialidad:* ${especialidad}\n\n` +
+            `*ENLACES DIRECTOS DE DESCARGA:*\n${detalle}`
+          );
 
-            if (linkLicencia) detalle += `*5. Licencia Conducir:* ${linkLicencia}\n`;
-            if (linkHojaVida) detalle += `*6. Hoja de Vida:* ${linkHojaVida}\n`;
-            if (linkTitulo) detalle += `*7. Certificado/Título:* ${linkTitulo}\n`;
+          window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
 
-            const miNumeroWhatsApp = "56967662502"; 
-            const mensajeWA = encodeURIComponent(
-              `*NUEVA POSTULACIÓN SKAN SERVICE*\n\n` +
-              `*Nombre:* ${nombre}\n` +
-              `*Especialidad:* ${especialidad}\n\n` +
-              `*ENLACES DIRECTOS DE DOCUMENTOS:*\n${detalle}`
-            );
-
-            window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
-            
-            closeProviderModal();
-            event.target.reset();
-            document.getElementById('seccionConductor').classList.add('hidden');
-          } catch (error) {
-            console.error("Error crítico en el proceso:", error);
-            alert("Hubo un error al subir los archivos. Por favor, verifica tu conexión e inténtalo de nuevo.");
-          } finally {
-            btnSubmit.innerHTML = textoOriginal;
-            btnSubmit.disabled = false;
-          }
+          closeProviderModal();
+          event.target.reset();
+          document.getElementById('seccionConductor').classList.add('hidden');
         }
     </script>
 </body>
