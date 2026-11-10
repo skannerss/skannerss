@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skan Service | Plataforma Multiservicios & Inspección SpA</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkmetal: '#0b1120',
+                        cardmetal: '#151f32',
+                        neoncyan: '#06b6d4',
+                        neonblue: '#3b82f6',
+                        darkborder: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS & JS for Interactive Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        .neon-glow { box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+        #map { height: 100%; width: 100%; border-radius: 0.75rem; }
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body class="bg-darkmetal text-slate-100 min-h-screen flex flex-col font-sans selection:bg-neoncyan selection:text-darkmetal">
+
+    <!-- Header / Navbar Principal -->
+    <header class="bg-cardmetal border-b border-darkborder sticky top-0 z-[9999] px-4 lg:px-8 py-3 flex items-center justify-between shadow-xl">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-neoncyan to-blue-600 flex items-center justify-center neon-glow">
+                <i class="fa-solid fa-bolt text-darkmetal text-xl font-bold"></i>
+            </div>
+            <div>
+                <span class="text-xl font-black tracking-wider text-white">SKAN <span class="text-neoncyan">SERVICE</span></span>
+                <span class="block text-[10px] text-slate-400 tracking-widest uppercase font-semibold">Plataforma Multiservicios & Inspección SpA</span>
+            </div>
+        </div>
+
+        <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
+            <a href="#inicio" class="hover:text-neoncyan transition-colors">Inicio</a>
+            <a href="#servicios" class="hover:text-neoncyan transition-colors">Servicios Domiciliarios</a>
+            <a href="#cobertura" class="hover:text-neoncyan transition-colors">Cobertura & Especialidades</a>
+            <a href="#ingenieria" class="hover:text-neoncyan transition-colors">Auditoría & ITO SKAN</a>
+            <a href="#mapa-section" class="hover:text-neoncyan transition-colors">Mapa en Vivo</a>
+        </nav>
+
+        <div class="flex items-center space-x-3">
+            <button onclick="openProviderModal()" class="hidden sm:inline-flex items-center px-3.5 py-2 rounded-lg border border-neoncyan text-neoncyan hover:bg-neoncyan hover:text-darkmetal text-xs font-bold transition-all">
+                <i class="fa-solid fa-user-tie mr-1.5"></i> Registrarse como Proveedor
+            </button>
+            <button onclick="openClientModal()" class="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-neoncyan to-blue-600 text-darkmetal font-bold text-xs hover:opacity-90 shadow-md neon-glow transition-all">
+                <i class="fa-solid fa-shield-halved mr-1.5"></i> Pedir Servicio (Registro Seguro)
+            </button>
+        </div>
+    </header>
+
+    <!-- Banner Hero -->
+    <section id="inicio" class="relative bg-gradient-to-b from-cardmetal to-darkmetal border-b border-darkborder py-10 px-4 text-center">
+        <div class="max-w-4xl mx-auto space-y-4">
+            <span class="inline-block px-3 py-1 bg-neoncyan/10 border border-neoncyan/30 rounded-full text-neoncyan text-xs font-semibold tracking-wider uppercase">
+                Red de Soluciones Técnicas, Profesionales y de Inspección
+            </span>
+            <h1 class="text-3xl lg:text-5xl font-extrabold text-white tracking-tight">
+                Servicios a Domicilio Verificados & <span class="text-neoncyan">Auditoría Técnica SKAN</span>
+            </h1>
+            <p class="text-slate-300 text-sm lg:text-base max-w-2xl mx-auto">
+                Conectamos clientes con profesionales de salud, técnicos e ingenieros verificados con biometría y carné de identidad para máxima seguridad en terreno.
+            </p>
+        </div>
+    </section>
+
+    <!-- Sección Mapa y Proveedores -->
+    <section id="mapa-section" class="p-4 lg:p-6 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-4 flex flex-col space-y-4">
+            <div class="bg-cardmetal border border-darkborder p-4 rounded-xl shadow-md">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-neoncyan mb-3 flex items-center">
+                    <i class="fa-solid fa-magnifying-glass mr-2"></i> Buscar Especialidad
+                </h2>
+                <input type="text" id="searchInput" placeholder="Ej. Electricista SEC, Kine, Enfermera..." class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-neoncyan">
+            </div>
+
+            <div class="bg-cardmetal border border-darkborder p-4 rounded-xl shadow-md flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-bold uppercase text-slate-300">Disponibles Cercanos</h3>
+                    <span class="text-[11px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-mono font-semibold">En Vivo</span>
+                </div>
+                <div class="space-y-3">
+                    <div onclick="openClientModal()" class="bg-darkmetal border border-darkborder hover:border-neoncyan p-3 rounded-lg cursor-pointer transition-all">
+                        <h4 class="font-bold text-sm text-white">Carlos M. <span class="text-xs text-neoncyan">(Eléctrico SEC A)</span></h4>
+                        <p class="text-xs text-slate-400 mt-1">Certificación TE1, tableros y aumentos.</p>
+                        <span class="text-[11px] text-neoncyan mt-2 block"><i class="fa-solid fa-location-dot mr-1"></i> Maipú - Disponible</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 bg-cardmetal border border-darkborder p-4 rounded-xl shadow-md min-h-[450px] flex flex-col">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-white mb-3 flex items-center">
+                <i class="fa-solid fa-map-location-dot text-neoncyan mr-2"></i> Cobertura Geográfica en Tiempo Real
+            </h2>
+            <div class="flex-1 w-full bg-darkmetal rounded-lg overflow-hidden border border-darkborder min-h-[400px]">
+                <div id="map"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODAL REGISTRO DE PROVEEDOR (UBER-STYLE CON WHATSAPP) -->
+    <div id="providerModal" class="hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-cardmetal border border-darkborder rounded-xl p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h3 class="text-lg font-bold text-white">Registro de Proveedor / Socio SKAN</h3>
+            <p class="text-xs text-slate-400">Completa tus datos para iniciar tu postulación.</p>
+          </div>
+          <button onclick="closeProviderModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+        </div>
+
+        <!-- Panel Informativo de Proceso -->
+        <div class="mb-4 bg-neoncyan/10 border border-neoncyan/30 rounded-lg p-3 space-y-1.5">
+          <div class="flex items-center text-xs font-bold text-neoncyan">
+            <i class="fa-solid fa-circle-info mr-1.5 text-sm"></i> ¿Cómo es el proceso de postulación?
+          </div>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            1. Llena tus datos personales, de facturación y especialidad en este formulario.<br>
+            2. Al hacer clic en <b>"Enviar Datos y Continuar por WhatsApp"</b>, se abrirá tu chat con Skan Service.<br>
+            3. Nuestro asistente virtual te solicitará los documentos respectivos (Carné, Antecedentes, etc.) de forma rápida y automatizada.
+          </p>
+        </div>
+        
+        <form onsubmit="handleProviderRegister(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre Completo</label>
+              <input type="text" id="prov_nombre" required placeholder="Tu nombre y apellido" class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">RUT / Cédula</label>
+              <input type="text" id="prov_rut" required placeholder="12.345.678-9" class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Fecha de Nacimiento</label>
+              <input type="date" id="prov_fnac" required class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Género / Sexo</label>
+              <select id="prov_genero" required class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan outline-none">
+                <option value="">Seleccionar...</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Estado Civil</label>
+              <select id="prov_ecivil" required class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan outline-none">
+                <option value="">Seleccionar...</option>
+                <option value="Soltero/a">Soltero/a</option>
+                <option value="Casado/a">Casado/a</option>
+                <option value="Divorciado/a">Divorciado/a</option>
+                <option value="Viudo/a">Viudo/a</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Dirección Particular</label>
+            <input type="text" id="prov_direccion" required placeholder="Calle, número, comuna" class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Especialidad</label>
+            <input type="text" id="prov_especialidad" required placeholder="Ej. Electricista SEC, Kinesiólogo, Abogado..." class="w-full bg-darkmetal border border-darkborder rounded-lg px-3 py-2 text-sm text-slate-100 focus:border-neoncyan outline-none">
+          </div>
+
+          <div class="border-t border-slate-700 pt-3 space-y-3 bg-darkmetal/40 p-3 rounded-lg border border-darkborder">
+            <label class="block text-xs font-bold text-neoncyan">¿Tiene empresa para facturar?</label>
+            <div class="flex space-x-4">
+              <label class="flex items-center text-xs text-slate-300 cursor-pointer">
+                <input type="radio" name="tiene_empresa" value="si" onclick="toggleEmpresa(true)" class="mr-1.5 accent-neoncyan"> Sí
+              </label>
+              <label class="flex items-center text-xs text-slate-300 cursor-pointer">
+                <input type="radio" name="tiene_empresa" value="no" checked onclick="toggleEmpresa(false)" class="mr-1.5 accent-neoncyan"> No (Se emite Boleta de Honorarios por Skan SpA)
+              </label>
+            </div>
+
+            <div id="camposEmpresa" class="hidden space-y-2 pt-2 border-t border-darkborder">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="emp_razon" placeholder="Razón Social" class="w-full bg-darkmetal border border-darkborder rounded-lg px-2.5 py-1.5 text-xs text-slate-100">
+                <input type="text" id="emp_rut" placeholder="RUT Empresa" class="w-full bg-darkmetal border border-darkborder rounded-lg px-2.5 py-1.5 text-xs text-slate-100">
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="w-full py-3 bg-gradient-to-r from-neoncyan to-blue-600 text-darkmetal font-extrabold text-sm rounded-lg hover:opacity-90 shadow-lg neon-glow transition-all flex items-center justify-center">
+              <i class="fa-brands fa-whatsapp text-lg mr-2"></i> Enviar Datos y Continuar por WhatsApp
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-cardmetal border-t border-darkborder py-6 text-center text-xs text-slate-400">
+        <p>&copy; 2026 Skan SpA. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        const map = L.map('map').setView([-33.4489, -70.6693], 12);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+
+        function openProviderModal() { document.getElementById('providerModal').classList.remove('hidden'); }
+        function closeProviderModal() { document.getElementById('providerModal').classList.add('hidden'); }
+        function openClientModal() { alert("Módulo de cliente seguro activo."); }
+        function toggleEmpresa(mostrar) {
+            const campos = document.getElementById('camposEmpresa');
+            if (mostrar) campos.classList.remove('hidden');
+            else campos.classList.add('hidden');
+        }
+
+        function handleProviderRegister(event) {
+            event.preventDefault();
+            const nombre = document.getElementById('prov_nombre').value;
+            const rut = document.getElementById('prov_rut').value;
+            const fnac = document.getElementById('prov_fnac').value;
+            const genero = document.getElementById('prov_genero').value;
+            const ecivil = document.getElementById('prov_ecivil').value;
+            const direccion = document.getElementById('prov_direccion').value;
+            const especialidad = document.getElementById('prov_especialidad').value;
+            
+            const tieneEmpresa = document.querySelector('input[name="tiene_empresa"]:checked').value;
+            let infoFacturacion = "Condición: Emisión de Boleta de Honorarios por Skan SpA";
+            if (tieneEmpresa === 'si') {
+                const razon = document.getElementById('emp_razon').value;
+                const rutEmp = document.getElementById('emp_rut').value;
+                infoFacturacion = `Factura con empresa:\n- Razón Social: ${razon}\n- RUT Empresa: ${rutEmp}`;
+            }
+
+            const miNumeroWhatsApp = "56967662502"; 
+            const mensajeWA = encodeURIComponent(
+                `NUEVA POSTULACIÓN SKAN SERVICE\n\n` +
+                `-- DATOS PERSONALES --\n` +
+                `Nombre: ${nombre}\n` +
+                `RUT: ${rut}\n` +
+                `Fecha Nac.: ${fnac}\n` +
+                `Género: ${genero}\n` +
+                `Estado Civil: ${ecivil}\n` +
+                `Dirección: ${direccion}\n` +
+                `Especialidad: ${especialidad}\n\n` +
+                `-- FACTURACIÓN --\n` +
+                `${infoFacturacion}\n\n` +
+                `Hola, ya completé mis datos en la web y quedo atento a que me soliciten los documentos por este medio.`
+            );
+
+            window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensajeWA}`, '_blank');
+            closeProviderModal();
+            event.target.reset();
+        }
+    </script>
+</body>
+</html>
